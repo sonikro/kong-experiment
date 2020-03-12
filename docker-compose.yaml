@@ -1,0 +1,56 @@
+version: "3"
+services:
+  kong-database:
+    image: postgres:9.6
+    networks: 
+      - kong
+    environment: 
+      - POSTGRES_PASSWORD=kong
+      - POSTGRES_USER=kong
+      - POSTGRES_DB=kong
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports: 
+      - 5432:5432
+  
+  kong:
+    image: kong:2.0.0
+    networks:
+      - kong
+    environment: 
+      - KONG_DATABASE=postgres
+      - KONG_PG_HOST=kong-database
+      - KONG_PG_PASSWORD=kong
+      - KONG_PG_USERNAME=kong
+      - KONG_CASSANDRA_CONTACT_POINTS=kong-database
+      - KONG_PROXY_ACCESS_LOG=/dev/stdout
+      - KONG_ADMIN_ACCESS_LOG=/dev/stdout
+      - KONG_PROXY_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_ERROR_LOG=/dev/stderr
+      - KONG_ADMIN_LISTEN=0.0.0.0:8001, 0.0.0.0:8444 ssl
+    ports: 
+      - 8000:8000
+      - 8443:8443
+      - 8001:8001
+      - 8444:8444
+  
+  konga:
+    image: pantsel/konga
+    networks: 
+      - kong
+    environment: 
+      - DB_ADAPTER=postgres
+      - DB_HOST=kong-database
+      - DB_PORT=5432
+      - DB_USER=kong
+      - DB_PASSWORD=kong
+      - DB_DATABASE=kong
+      - NODE_ENV=production
+    ports:
+      - 1337:1337
+  
+networks:
+  kong:
+
+volumes:
+  pg_data:
