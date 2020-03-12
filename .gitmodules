@@ -1,0 +1,3 @@
+[submodule "kong-sample-api"]
+	path = kong-sample-api
+	url = https://github.com/sonikro/kong-sample-api.git
